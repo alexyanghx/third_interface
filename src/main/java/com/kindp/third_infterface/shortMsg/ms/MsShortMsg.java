@@ -1,12 +1,9 @@
-package com.kindp.third_infterface.shortMsg;
+package com.kindp.third_infterface.shortMsg.ms;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -25,7 +22,7 @@ public class MsShortMsg {
 	private String tempid;
 	
 	private static MsShortMsg instance;
-	private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+	
 	private MsShortMsg() throws IOException{
 		Properties prop = new Properties();
 		prop.load(this.getClass().getClassLoader().getResourceAsStream("config/system.properties"));
@@ -52,16 +49,9 @@ public class MsShortMsg {
 		return params;
 	}
 	
-	public static MsShortMsg getInstance() throws Exception {
+	public static synchronized MsShortMsg getInstance() throws Exception {
 		if (instance == null) {
-			Lock lock = readWriteLock.writeLock();
-			
-			try {
-				lock.lock();
-				instance = new MsShortMsg();
-			} finally {
-				lock.unlock();
-			}
+			instance = new MsShortMsg();
 		}
 
 		return instance;

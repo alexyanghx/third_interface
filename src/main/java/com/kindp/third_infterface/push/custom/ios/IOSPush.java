@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javapns.devices.Device;
 import javapns.devices.implementations.basic.BasicDevice;
@@ -29,8 +26,6 @@ public class IOSPush {
 
 	private static IOSPush instance;
 	
-	private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-	
 	private IOSPush() throws Exception {
 
 		Properties prop = new Properties();
@@ -50,14 +45,7 @@ public class IOSPush {
 	
 	public static IOSPush getInstance() throws Exception {
 		if (instance == null) {
-			Lock lock = readWriteLock.writeLock();
-			
-			try {
-				lock.lock();
-				instance = new IOSPush();
-			} finally {
-				readWriteLock.writeLock().unlock();
-			}
+			instance = new IOSPush();
 		}
 
 		return instance;

@@ -3,9 +3,6 @@ package com.kindp.third_infterface.push.umeng;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.kindp.third_infterface.push.umeng.android.AndroidUnicast;
 
@@ -29,8 +26,6 @@ public class AndroidPush {
 
 	private static AndroidPush instance;
 
-	private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
 	private AndroidPush() throws IOException {
 		Properties prop = new Properties();
 		prop.load(this.getClass().getClassLoader()
@@ -48,15 +43,7 @@ public class AndroidPush {
 
 	public static AndroidPush getInstance() throws IOException {
 		if (instance == null) {
-			Lock lock = readWriteLock.writeLock();
-			
-			try {
-				lock.lock();
-				instance = new AndroidPush();
-			} finally {
-				lock.unlock();
-			}
-
+			instance = new AndroidPush();
 		}
 
 		return instance;
