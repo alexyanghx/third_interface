@@ -118,6 +118,11 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.swetake</groupId>
+			<artifactId>qrcode</artifactId>
+			<version>0.0.5</version>
+		</dependency>
 	</dependencies>
 	
 	<build></build>

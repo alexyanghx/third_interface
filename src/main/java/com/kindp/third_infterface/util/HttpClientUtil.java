@@ -31,7 +31,7 @@ public class HttpClientUtil {
 			post = new PostMethod(url);
 			if (params != null) {
 				for (String key : params.keySet()) {
-					post.addParameter(key, params.get(key).toString());
+					post.addParameter(key, params.get(key)==null?"":params.get(key));
 				}
 			}
 
