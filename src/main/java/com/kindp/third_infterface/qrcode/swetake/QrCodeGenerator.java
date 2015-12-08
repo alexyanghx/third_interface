@@ -1,4 +1,4 @@
-package com.kindp.third_infterface.util;
+package com.kindp.third_infterface.qrcode.swetake;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -11,24 +11,32 @@ import javax.imageio.ImageIO;
 
 import com.swetake.util.Qrcode;
 
-public class QrCodeUtil {
+public class QrCodeGenerator {
+	
+	private QrCodeGenerator(){}
+	
+	private static class LazyHolder{
+		private static final Qrcode instance = new Qrcode();
+		
+		static {
+			//错误修正容量   
+	        //L水平   7%的字码可被修正  
+	        //M水平   15%的字码可被修正  
+	        //Q水平   25%的字码可被修正  
+	        //H水平   30%的字码可被修正  
+	        //QR码有容错能力，QR码图形如果有破损，仍然可以被机器读取内容，最高可以到7%~30%面积破损仍可被读取。  
+	        //相对而言，容错率愈高，QR码图形面积愈大。所以一般折衷使用15%容错能力。
+			instance.setQrcodeErrorCorrect('H');/* L','M','Q','H' */  
+			instance.setQrcodeEncodeMode('B');/* "N","A" or other */  
+			instance.setQrcodeVersion(3);/* 0-20 */  
+		}
+	} 
 	
 	public static boolean createImage(String content,int unitWidth,String output){
 		int DEFAULT_WIDTH = 0;
 	    int UNIT_WIDTH = unitWidth;
 	    
-		Qrcode qrcode=new Qrcode();
-        //错误修正容量   
-        //L水平   7%的字码可被修正  
-        //M水平   15%的字码可被修正  
-        //Q水平   25%的字码可被修正  
-        //H水平   30%的字码可被修正  
-        //QR码有容错能力，QR码图形如果有破损，仍然可以被机器读取内容，最高可以到7%~30%面积破损仍可被读取。  
-        //相对而言，容错率愈高，QR码图形面积愈大。所以一般折衷使用15%容错能力。  
-        qrcode.setQrcodeErrorCorrect('H');/* L','M','Q','H' */  
-        qrcode.setQrcodeEncodeMode('B');/* "N","A" or other */  
-        qrcode.setQrcodeVersion(3);/* 0-20 */  
-  
+		Qrcode qrcode=LazyHolder.instance;
   
         byte[] buff = null;  
         try {  
