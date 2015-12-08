@@ -144,11 +144,17 @@ public class IOSPush {
 			// true：表示的是产品发布推送服务 false：表示的是产品测试推送服务
 			Device device = new BasicDevice();
 			device.setToken(deviceToken);
-			PushedNotification notification = pushManager.sendNotification(device, payLoad, true);
-
+			PushedNotification notification = pushManager.sendNotification(device, payLoad, false);
+			System.out.println("ios push result :"+notification.isSuccessful());
 			return notification.isSuccessful();
 		} catch (Exception e) {
 			e.printStackTrace();
+			try {
+				instance = new IOSPush();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			return false;
 		}
 	}
@@ -176,6 +182,12 @@ public class IOSPush {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			try {
+				instance = new IOSPush();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			return false;
 		}
 
