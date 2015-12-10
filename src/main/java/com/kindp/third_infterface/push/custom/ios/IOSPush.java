@@ -5,14 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javapns.communication.exceptions.CommunicationException;
+import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.implementations.basic.BasicDevice;
+import javapns.notification.AppleNotificationServer;
 import javapns.notification.AppleNotificationServerBasicImpl;
 import javapns.notification.PushNotificationManager;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 
 public class IOSPush {
@@ -25,6 +29,8 @@ public class IOSPush {
 	private boolean product;
 
 	private static IOSPush instance;
+	private AppleNotificationServer server;
+	private Logger log = Logger.getLogger(this.getClass());
 	
 	private IOSPush() throws Exception {
 
@@ -36,11 +42,11 @@ public class IOSPush {
 		certificatePath=prop.getProperty("ios.certificatePath");
 		certificatePassword=prop.getProperty("ios.certificatePassword");
 		product = Boolean.parseBoolean(prop.getProperty("ios.product"));
-		
-		pushManager = new PushNotificationManager();
-		pushManager.initializeConnection(new AppleNotificationServerBasicImpl(
+		server = new AppleNotificationServerBasicImpl(
 				this.getClass().getClassLoader()
-				.getResourceAsStream(certificatePath), certificatePassword, product));
+				.getResourceAsStream(certificatePath), certificatePassword, product);
+		pushManager = new PushNotificationManager();
+		pushManager.initializeConnection(server);
 	}
 	
 	public static IOSPush getInstance() throws Exception {
@@ -133,30 +139,47 @@ public class IOSPush {
 	}
 
 	public boolean push(String msg, String deviceToken,Map<String,String> extParams) {
-		try {
-			PushNotificationPayload payLoad = getPayLoad();
-			payLoad.addAlert(msg); // 消息内容
-			if(extParams!=null){
-				for(String key:extParams.keySet()){
-					payLoad.addCustomDictionary(key, extParams.get(key));
-				}
-			}
-			// true：表示的是产品发布推送服务 false：表示的是产品测试推送服务
-			Device device = new BasicDevice();
-			device.setToken(deviceToken);
-			PushedNotification notification = pushManager.sendNotification(device, payLoad, false);
-			System.out.println("ios push result :"+notification.isSuccessful());
-			return notification.isSuccessful();
-		} catch (Exception e) {
-			e.printStackTrace();
+			PushNotificationPayload payLoad;
+			boolean success = true;
 			try {
-				instance = new IOSPush();
-			} catch (Exception e1) {
+				payLoad = getPayLoad();
+			
+				payLoad.addAlert(msg); // 消息内容
+				if(extParams!=null){
+					for(String key:extParams.keySet()){
+						payLoad.addCustomDictionary(key, extParams.get(key));
+					}
+				}
+				// true：表示的是产品发布推送服务 false：表示的是产品测试推送服务
+				Device device = new BasicDevice();
+				device.setToken(deviceToken);
+				PushedNotification notification = pushManager.sendNotification(device, payLoad, false);
+				success = notification.isSuccessful();
+				System.out.println(String.format("ios token[%s] push result :[%s]",deviceToken,notification.isSuccessful()));
+				if(notification.getException()!=null&&notification.getException().getMessage().contains("Socket is closed")){
+//					notification.getException().printStackTrace();
+					log.info("#AAAAA#ios push Socket is closed restart");
+					pushManager.restartConnection(server);
+				}
+			} catch (JSONException e) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				log.error("#AAAAA#ios push JSONException :");
+				e.printStackTrace();
+				success = false;
+			} catch (CommunicationException e) {
+				// TODO Auto-generated catch block
+				log.error("#AAAAA#ios push CommunicationException :");
+				e.printStackTrace();
+				success = false;
+			} catch (KeystoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				log.error("#AAAAA#ios push restart Error :");
+				e.printStackTrace();
+				success = false;
 			}
-			return false;
-		}
+			
+			return success;
 	}
 	
 	public boolean multiPush(String msg, List<String> deviceTokens,
@@ -182,12 +205,6 @@ public class IOSPush {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			try {
-				instance = new IOSPush();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			return false;
 		}
 
