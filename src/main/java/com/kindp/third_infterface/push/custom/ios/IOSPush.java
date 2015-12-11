@@ -50,9 +50,9 @@ public class IOSPush {
 	}
 	
 	public static IOSPush getInstance() throws Exception {
-		if (instance == null) {
+//		if (instance == null) {
 			instance = new IOSPush();
-		}
+//		}
 
 		return instance;
 	}
@@ -156,11 +156,11 @@ public class IOSPush {
 				PushedNotification notification = pushManager.sendNotification(device, payLoad, false);
 				success = notification.isSuccessful();
 				System.out.println(String.format("ios token[%s] push result :[%s]",deviceToken,notification.isSuccessful()));
-				if(notification.getException()!=null&&notification.getException().getMessage().contains("Socket is closed")){
-//					notification.getException().printStackTrace();
-					log.info("#AAAAA#ios push Socket is closed restart");
-					pushManager.restartConnection(server);
-				}
+//				if(notification.getException()!=null&&notification.getException().getMessage().contains("Socket is closed")){
+////					notification.getException().printStackTrace();
+//					log.info("#AAAAA#ios push Socket is closed restart");
+//					pushManager.restartConnection(server);
+//				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				log.error("#AAAAA#ios push JSONException :");
@@ -171,12 +171,19 @@ public class IOSPush {
 				log.error("#AAAAA#ios push CommunicationException :");
 				e.printStackTrace();
 				success = false;
-			} catch (KeystoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				log.error("#AAAAA#ios push restart Error :");
-				e.printStackTrace();
-				success = false;
+			} finally{
+				try {
+					pushManager.stopConnection();
+					log.info("pushManager stopConnection success!");
+				} catch (CommunicationException e) {
+					// TODO Auto-generated catch block
+					log.info("pushManager stopConnection CommunicationException error !");
+					e.printStackTrace();
+				} catch (KeystoreException e) {
+					// TODO Auto-generated catch block
+					log.info("pushManager stopConnection KeystoreException error !");
+					e.printStackTrace();
+				}
 			}
 			
 			return success;
@@ -184,13 +191,17 @@ public class IOSPush {
 	
 	public boolean multiPush(String msg, List<String> deviceTokens,
 			List<PushedNotification> failedNotifications,
-			List<PushedNotification> successfulNotifications) {
+			List<PushedNotification> successfulNotifications,Map<String,String> extParams) {
 
 		try {
 			PushNotificationPayload payLoad = getPayLoad();
 			payLoad.addAlert(msg); // 消息内容
+			if(extParams!=null){
+				for(String key:extParams.keySet()){
+					payLoad.addCustomDictionary(key, extParams.get(key));
+				}
+			}
 			// true：表示的是产品发布推送服务 false：表示的是产品测试推送服务
-
 			List<PushedNotification> notifications = new ArrayList<PushedNotification>();
 			List<Device> devices = new ArrayList<Device>();
 			for (String token : deviceTokens) {
