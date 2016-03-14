@@ -73,7 +73,7 @@ public class MsShortMsg {
 			params.put("sendtime", sendtime);
 		}
 		String result = HttpClientUtil.request(url, params);
-		
+		System.out.println(result);
 		if(result==null)
 			return false;
 		

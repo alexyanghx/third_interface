@@ -7,11 +7,12 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 
 public class HttpClientUtil {
-	private static final HttpClient httpClient = new HttpClient();
+	private static final HttpClient httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 	
 	private final static Logger log = Logger.getLogger(HttpClientUtil.class);
 
