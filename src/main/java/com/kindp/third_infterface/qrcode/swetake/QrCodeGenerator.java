@@ -64,7 +64,7 @@ public class QrCodeGenerator {
   
                 for (int j=0;j<bRect.length;j++){
                     if (bRect[j][i]) {  
-                        g.fillRect(j*UNIT_WIDTH, i*UNIT_WIDTH, UNIT_WIDTH-1, UNIT_WIDTH-1);  
+                        g.fillRect(j*UNIT_WIDTH, i*UNIT_WIDTH, UNIT_WIDTH, UNIT_WIDTH);  
                     }  
                 }  
   
