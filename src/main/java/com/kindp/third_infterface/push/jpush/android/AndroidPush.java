@@ -26,19 +26,9 @@ public class AndroidPush {
     private String appKey = null;
 	private String appMasterSecret = null;
 	
-	public String alert = "提示";
+	public String alert;
 	// 必填 通知标题
 	private String title;
-	// 必填 通知栏提示文字
-	private String builderId;
-	// 必填 值可以为:
-	// "go_app": 打开应用
-	// "go_url": 跳转到URL
-	// "go_activity": 打开特定的activity
-	// "go_custom": 用户自定义内容。
-	private String afterOpen;
-	// 可选 正式/测试模式。测试模式下，广播/组播只会将消息发给测试设备
-	private boolean productionMode;
 
 	private static AndroidPush instance;
 	private final JPushClient jpushClient;
@@ -51,10 +41,6 @@ public class AndroidPush {
 		appKey = prop.getProperty("jpush.appKey");
 		appMasterSecret = prop.getProperty("jpush.appMasterSecret");
 		title = prop.getProperty("jpush.title");
-		builderId = prop.getProperty("jpush.builderId");
-		productionMode = Boolean.parseBoolean(prop
-				.getProperty("jpush.production_mode"));
-		
 		jpushClient = new JPushClient(appMasterSecret, appKey);
 
 	}
