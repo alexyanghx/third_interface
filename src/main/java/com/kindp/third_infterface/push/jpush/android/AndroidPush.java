@@ -12,6 +12,7 @@ import cn.jpush.api.JPushClient;
 import cn.jpush.api.common.APIConnectionException;
 import cn.jpush.api.common.APIRequestException;
 import cn.jpush.api.push.PushResult;
+import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
@@ -87,10 +88,14 @@ public class AndroidPush {
 	}
 	
 	public PushPayload buildAndroidPayload(String msg,String devId,Map<String,String> extra){
+		Message.Builder msgBuilder = Message.newBuilder().setMsgContent(msg);
+		if(extra!=null)msgBuilder.addExtras(extra);
+		
 		return PushPayload.newBuilder()
         .setPlatform(Platform.android())
         .setAudience(Audience.registrationId(devId))
-        .setNotification(Notification.android(msg, title, extra))
+        //.setNotification(Notification.android(msg, msg, extra))
+        .setMessage(msgBuilder.build())
         .build();
 	}
 	

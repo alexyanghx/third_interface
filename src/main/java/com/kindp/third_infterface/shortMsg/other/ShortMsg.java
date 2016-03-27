@@ -65,7 +65,7 @@ public class ShortMsg {
 		params.put("sdst", phone);
 		
 		String result = HttpClientUtil.request(url, params);
-		
+		System.out.println(result);
 		if(result==null)
 			return false;
 		
