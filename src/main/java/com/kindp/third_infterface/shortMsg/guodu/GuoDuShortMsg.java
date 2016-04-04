@@ -25,13 +25,6 @@ import com.kindp.third_infterface.shortMsg.guodu.vo.SendResult;
 import com.kindp.third_infterface.util.HttpClientUtil;
 import com.kindp.third_infterface.util.XStreamUtil;
 
-/* ========================================================
- * 北京国都互联科技有限公司
- * 日 期：2012-12-18  上午10:04:19
- * 作 者：wangjialong
- * 版 本：0.1
- * =========================================================
- */
 public class GuoDuShortMsg {
 	
 	private String username;
@@ -70,6 +63,9 @@ public class GuoDuShortMsg {
 	
 	
 	 public boolean sendOneMsg(String content,String desMobile,String sendTime,String validTime){
+		 
+		 content = String.format(tmpStr, content,expireTime);
+		 
 		 String response = HttpClientUtil.requestGet(getUrl(content, new String[]{desMobile}, sendTime, validTime),reqCharset);
 		 if(response==null)return false;
 		 
