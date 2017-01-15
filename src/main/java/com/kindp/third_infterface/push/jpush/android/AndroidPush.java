@@ -3,6 +3,7 @@ package com.kindp.third_infterface.push.jpush.android;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,7 +17,6 @@ import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
-import cn.jpush.api.push.model.notification.Notification;
 
 public class AndroidPush {
     protected static final Logger LOG = Logger.getLogger(AndroidPush.class);
@@ -34,7 +34,7 @@ public class AndroidPush {
 	private static AndroidPush instance;
 	private final JPushClient jpushClient;
 	private static ReadWriteLock lock = new ReentrantReadWriteLock();
-
+	private final static Map<String,AndroidPush> instances = new ConcurrentHashMap<String, AndroidPush>();
 	private AndroidPush() throws IOException {
 		Properties prop = new Properties();
 		prop.load(this.getClass().getClassLoader()
@@ -44,6 +44,12 @@ public class AndroidPush {
 		title = prop.getProperty("jpush.title");
 		jpushClient = new JPushClient(appMasterSecret, appKey);
 
+	}
+	
+	private AndroidPush(String appKey, String appMasterSecret) {
+		this.appKey = appKey;
+		this.appMasterSecret = appMasterSecret;
+		jpushClient = new JPushClient(appMasterSecret, appKey);
 	}
 
 	public static AndroidPush getInstance() throws IOException {
@@ -61,6 +67,19 @@ public class AndroidPush {
 		return instance;
 	}
 	
+	public static AndroidPush getInstance(String appId,String appKey,String appMasterSecret) throws IOException {
+		AndroidPush inst = instances.get(appId);
+		if (inst == null) {
+			synchronized (instances) {
+				if((inst=instances.get(appId))==null){
+					inst = new AndroidPush(appKey,appMasterSecret);
+					instances.put(appId, inst);
+				}
+			}
+			
+		}
+		return inst;
+	}
 	
 	public boolean pushAndroid(String msg,String devId,Map<String,String> extra) {
 	    // HttpProxy proxy = new HttpProxy("localhost", 3128);

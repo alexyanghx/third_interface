@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javapns.communication.exceptions.CommunicationException;
 import javapns.communication.exceptions.KeystoreException;
@@ -32,6 +33,8 @@ public class IOSPush {
 	private AppleNotificationServer server;
 	private Logger log = Logger.getLogger(this.getClass());
 	
+	private final Map<String,IOSPush> instances = new ConcurrentHashMap<String, IOSPush>();
+	
 	private IOSPush() throws Exception {
 
 		Properties prop = new Properties();
@@ -49,12 +52,30 @@ public class IOSPush {
 		pushManager.initializeConnection(server);
 	}
 	
+	private IOSPush(Integer badge,String sound,String certificatePath,String certificatePassword,boolean product) throws Exception{
+		this.badge = badge;
+		this.sound = sound;
+		this.certificatePath = certificatePath;
+		this.certificatePassword = certificatePassword;
+		this.product = product;
+		
+		server = new AppleNotificationServerBasicImpl(
+				this.getClass().getClassLoader()
+				.getResourceAsStream(certificatePath), certificatePassword, product);
+		pushManager = new PushNotificationManager();
+		pushManager.initializeConnection(server);
+	}
+	
 	public static IOSPush getInstance() throws Exception {
 //		if (instance == null) {
 			instance = new IOSPush();
 //		}
 
 		return instance;
+	}
+	
+	public static IOSPush getInstance(Integer badge,String sound,String certificatePath,String certificatePassword,boolean product)  throws Exception {
+		return new IOSPush(badge,sound,certificatePath,certificatePassword,product);
 	}
 	
 	public int getBadge() {
